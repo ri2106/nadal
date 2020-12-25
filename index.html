@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Nadal 2020</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <div class="xmas-content fade-in">
+      <img class="xmas-image" src="nadal.png" />
+      <div class="xmas-content-text left">
+        <h1>L'infant s'ha adormit</h1>
+        <p>
+          L’Infant s’ha adormit dolçament<br />
+          però la terra és hostil, ben a prop,<br />
+          perquè els homes no saben d’amor,<br />
+          els encega l’enveja perversa, el despit<br />
+          i els ofega el rancor més mesquí.<br /><br />
+
+          Quan, de sobte, l’Infant és tot plor,<br />
+          sanglotant el malson,<br />
+          fins que troba l’esguard de Maria,<br />
+          amb la pau que encomana,<br />
+          i l’escalf desitjat de la seva abraçada,<br />
+          aquells dits que pentinen la pell fent camins<br />
+          i el somrís més humil que desvetlla esperances.<br /><br />
+        </p>
+      </div>
+      <div class="xmas-content-text right">
+        <p>
+          L’Infant s’ha adormit novament<br />
+          però la terra és hostil, anys enllà,<br />
+          perquè l’home no aprèn del passat<br />
+          i segueix entestat a mirar-se a ell mateix<br />
+          i a inventar-se pretexts per desfer.<br /><br />
+
+          Quan, de sobte, l’Infant és tot plor,<br />
+          sanglotant el malson,<br />
+          fins que troba l’esguard de Maria,<br />
+          amb la pau que encomana,<br />
+          i l’escalf desitjat de la seva abraçada,<br />
+          aquells dits que pentinen la pell fent camins<br />
+          i el somrís més humil que desvetlla esperances.<br />
+        </p>
+        <p class="composers">
+          Lletra: Jesús Nieto <br />
+          Música: Ricard Gimeno
+        </p>
+      </div>
+      <div class="corner-ribbon bottom-right sticky">
+        Bon Nadal i "millor" 2021!<br />
+        <span>Ricard</span>
+      </div>
+      <canvas id="xmas" class="xmas-snow"></canvas>
+    </div>
+
+    <audio id="xmas-audio">
+      <source src="nadal2020.mp3" type="audio/mp3" />
+      Your browser does not support the audio element.
+    </audio>
+
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs="
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      $(document).ready(function () {
+        initLetItSnow();
+      });
+
+      $(".xmas-snow").on("click", function () {
+        if ($("#xmas-audio").prop("paused")) {
+          $("#xmas-audio").trigger("play");
+        } else {
+          $("#xmas-audio").trigger("pause");
+        }
+      });
+
+      // Init Christmas! \o/
+      var initLetItSnow = function () {
+        (function () {
+          var requestAnimationFrame =
+            window.requestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.msRequestAnimationFrame ||
+            function (callback) {
+              window.setTimeout(callback, 1000 / 60);
+            };
+          window.requestAnimationFrame = requestAnimationFrame;
+        })();
+
+        var flakes = [],
+          canvas = document.getElementById("xmas"),
+          ctx = canvas.getContext("2d"),
+          mX = -100,
+          mY = -100;
+
+        if ($(window).width() < 999) {
+          var flakeCount = 125;
+        } else {
+          var flakeCount = 425;
+        }
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        function snow() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          for (var i = 0; i < flakeCount; i++) {
+            var flake = flakes[i],
+              x = mX,
+              y = mY,
+              minDist = 150,
+              x2 = flake.x,
+              y2 = flake.y;
+
+            var dist = Math.sqrt((x2 - x) * (x2 - x) + (y2 - y) * (y2 - y)),
+              dx = x2 - x,
+              dy = y2 - y;
+
+            if (dist < minDist) {
+              var force = minDist / (dist * dist),
+                xcomp = (x - x2) / dist,
+                ycomp = (y - y2) / dist,
+                deltaV = force;
+
+              flake.velX -= deltaV * xcomp;
+              flake.velY -= deltaV * ycomp;
+            } else {
+              flake.velX *= 0.98;
+              if (flake.velY <= flake.speed) {
+                flake.velY = flake.speed;
+              }
+              flake.velX += Math.cos((flake.step += 0.05)) * flake.stepSize;
+            }
+
+            ctx.fillStyle = "rgba(255,255,255," + flake.opacity + ")";
+            flake.y += flake.velY;
+            flake.x += flake.velX;
+
+            if (flake.y >= canvas.height || flake.y <= 0) {
+              reset(flake);
+            }
+
+            if (flake.x >= canvas.width || flake.x <= 0) {
+              reset(flake);
+            }
+            ctx.beginPath();
+            ctx.arc(flake.x, flake.y, flake.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          requestAnimationFrame(snow);
+        }
+
+        function reset(flake) {
+          flake.x = Math.floor(Math.random() * canvas.width);
+          flake.y = 0;
+          flake.size = Math.random() * 3 + 1;
+          flake.speed = Math.random() * 0.45 + 0.25;
+          flake.velY = flake.speed;
+          flake.velX = 0;
+          flake.opacity = Math.random() * 0.5 + 0.3;
+        }
+
+        function init() {
+          for (var i = 0; i < flakeCount; i++) {
+            var x = Math.floor(Math.random() * canvas.width),
+              y = Math.floor(Math.random() * canvas.height),
+              size = Math.random() * 4 + 1,
+              speed = Math.random() * 0.45 + 0.25,
+              opacity = Math.random() * 0.5 + 0.3;
+
+            flakes.push({
+              speed: speed,
+              velY: speed,
+              velX: 0,
+              x: x,
+              y: y,
+              size: size,
+              stepSize: Math.random() / 160,
+              step: 0,
+              opacity: opacity,
+            });
+          }
+
+          snow();
+        }
+
+        canvas.addEventListener("mousemove", function (e) {
+          (mX = e.clientX), (mY = e.clientY);
+        });
+
+        window.addEventListener("resize", function () {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+        });
+
+        init();
+      };
+    </script>
+  </body>
+</html>
